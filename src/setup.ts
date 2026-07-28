@@ -4,15 +4,36 @@ import { json } from 'express'
 import { Container } from 'inversify'
 import database from './database'
 import settings from './settings'
+import { ApplicationSettingsController } from './app/ApplicationSettings/ApplicationSettings.controller'
+import { ApplicationSettingsService } from './app/ApplicationSettings/ApplicationSettings.service'
+import { ApplicationSettingsDao } from './app/ApplicationSettings/ApplicationSettings.dao'
+import { AppThemesController } from './app/AppThemes/AppThemes.controller'
+import { AppThemesService } from './app/AppThemes/AppThemes.service'
+import { AppThemesDao } from './app/AppThemes/AppThemes.dao'
+import { AppScreensController } from './app/AppScreens/AppScreens.controller'
+import { AppScreensService } from './app/AppScreens/AppScreens.service'
+import { AppScreensDao } from './app/AppScreens/AppScreens.dao'
 
 export const container: Container = new Container()
 
 const app = new Application(settings, database)
 
-app.getApp().set("query parser", 'extended')
+app.getApp().set('query parser', 'extended')
 
 container.bind('database').toConstantValue(database)
 container.bind(Application).toConstantValue(app)
+
+container.bind(ApplicationSettingsDao).toSelf()
+container.bind(ApplicationSettingsService).toSelf()
+container.bind(ApplicationSettingsController).toSelf()
+
+container.bind(AppThemesDao).toSelf()
+container.bind(AppThemesService).toSelf()
+container.bind(AppThemesController).toSelf()
+
+container.bind(AppScreensDao).toSelf()
+container.bind(AppScreensService).toSelf()
+container.bind(AppScreensController).toSelf()
 
 app.addMiddleWare(cors())
 app.addMiddleWare(json())

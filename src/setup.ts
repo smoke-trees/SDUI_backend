@@ -2,17 +2,17 @@ import { Application } from '@smoke-trees/postgres-backend'
 import cors from 'cors'
 import { json } from 'express'
 import { Container } from 'inversify'
+import { ApplicationSettingsController } from './app/ApplicationSettings/ApplicationSettings.controller'
+import { ApplicationSettingsDao } from './app/ApplicationSettings/ApplicationSettings.dao'
+import { ApplicationSettingsService } from './app/ApplicationSettings/ApplicationSettings.service'
+import { AppScreensController } from './app/AppScreens/AppScreens.controller'
+import { AppScreensDao } from './app/AppScreens/AppScreens.dao'
+import { AppScreensService } from './app/AppScreens/AppScreens.service'
+import { AppThemesController } from './app/AppThemes/AppThemes.controller'
+import { AppThemesDao } from './app/AppThemes/AppThemes.dao'
+import { AppThemesService } from './app/AppThemes/AppThemes.service'
 import database from './database'
 import settings from './settings'
-import { ApplicationSettingsController } from './app/ApplicationSettings/ApplicationSettings.controller'
-import { ApplicationSettingsService } from './app/ApplicationSettings/ApplicationSettings.service'
-import { ApplicationSettingsDao } from './app/ApplicationSettings/ApplicationSettings.dao'
-import { AppThemesController } from './app/AppThemes/AppThemes.controller'
-import { AppThemesService } from './app/AppThemes/AppThemes.service'
-import { AppThemesDao } from './app/AppThemes/AppThemes.dao'
-import { AppScreensController } from './app/AppScreens/AppScreens.controller'
-import { AppScreensService } from './app/AppScreens/AppScreens.service'
-import { AppScreensDao } from './app/AppScreens/AppScreens.dao'
 
 export const container: Container = new Container()
 
@@ -34,6 +34,10 @@ container.bind(AppThemesController).toSelf()
 container.bind(AppScreensDao).toSelf()
 container.bind(AppScreensService).toSelf()
 container.bind(AppScreensController).toSelf()
+
+app.addController(container.get(ApplicationSettingsController))
+app.addController(container.get(AppThemesController))
+app.addController(container.get(AppScreensController))
 
 app.addMiddleWare(cors())
 app.addMiddleWare(json())

@@ -65,15 +65,29 @@ export class AppScreensService extends Service<AppScreens> {
 		const latest = await this.dao.read({ where: { screenName, isLatest: true } })
 
 		if (latest.status.error || !latest.result) {
+			log.debug('screen not found', 'AppScreensService/revertLatest', latest)
 			return new Result(true, ErrorCode.NotFound, 'screen not found')
 		}
 
-		await this.dao.update(latest.result.id, {
-			isLatest: false
-		})
-		return await this.dao.update(
+		if (latest.result.version === (version ?? 1)) {
+			log.debug('version is already latest', 'AppScreensService/revertLatest', latest)
+			return new Result(true, ErrorCode.BadRequest, 'version is already latest')
+		}
+		const updateResult = await this.dao.update(
 			{ screenName, version: version ?? latest.result.version - 1 },
 			{ isLatest: true }
 		)
+		log.debug('updateResult', 'AppScreensService/revertLatest', {
+			screenName,
+			version: version ?? latest.result.version - 1,
+			isLatest: true
+		})
+		if (!updateResult.status.error) {
+			await this.dao.update(latest.result.id, {
+				isLatest: false
+			})
+		}
+
+		return updateResult
 	}
 }

@@ -31,7 +31,7 @@ export class AppThemesService extends Service<AppThemes> {
 			const existingLatest = await this.dao.read({ where: { themeName, isLatest: true } })
 
 			if (!existingLatest.status.error && existingLatest.result) {
-				log.debug('updating last latest app screen version', 'AppScreensService/deployScreen', {
+				log.debug('updating last latest app screen version', 'AppThemesService/deployScreen', {
 					themeName,
 					id: existingLatest.result.id
 				})
@@ -41,7 +41,7 @@ export class AppThemesService extends Service<AppThemes> {
 			}
 		}
 
-		log.debug('creating new app screen version', 'AppScreensService/deployScreen', {
+		log.debug('creating new app screen version', 'AppThemesService/deployScreen', {
 			themeName,
 			version: newVersion
 		})
@@ -63,15 +63,29 @@ export class AppThemesService extends Service<AppThemes> {
 		const latest = await this.dao.read({ where: { themeName, isLatest: true } })
 
 		if (latest.status.error || !latest.result) {
+			log.debug('screen not found', 'AppThemesService/revertLatest', latest)
 			return new Result(true, ErrorCode.NotFound, 'screen not found')
 		}
 
-		await this.dao.update(latest.result.id, {
-			isLatest: false
-		})
-		return await this.dao.update(
+		if (latest.result.version === (version ?? 1)) {
+			log.debug('version is already latest', 'AppThemesService/revertLatest', latest)
+			return new Result(true, ErrorCode.BadRequest, 'version is already latest')
+		}
+		const updateResult = await this.dao.update(
 			{ themeName, version: version ?? latest.result.version - 1 },
 			{ isLatest: true }
 		)
+		log.debug('updateResult', 'AppThemesService/revertLatest', {
+			themeName,
+			version: version ?? latest.result.version - 1,
+			isLatest: true
+		})
+		if (!updateResult.status.error) {
+			await this.dao.update(latest.result.id, {
+				isLatest: false
+			})
+		}
+
+		return updateResult
 	}
 }

@@ -11,6 +11,12 @@ import { AppScreensService } from './app/AppScreens/AppScreens.service'
 import { AppThemesController } from './app/AppThemes/AppThemes.controller'
 import { AppThemesDao } from './app/AppThemes/AppThemes.dao'
 import { AppThemesService } from './app/AppThemes/AppThemes.service'
+import { ToDoController } from './app/ToDo/ToDo.controller'
+import { ToDoDao } from './app/ToDo/ToDo.dao'
+import { ToDoService } from './app/ToDo/ToDo.service'
+import { UserController } from './app/User/User.controller'
+import { UserDao } from './app/User/User.dao'
+import { UserService } from './app/User/User.service'
 import database from './database'
 import settings from './settings'
 
@@ -22,6 +28,14 @@ app.getApp().set('query parser', 'extended')
 
 container.bind('database').toConstantValue(database)
 container.bind(Application).toConstantValue(app)
+
+container.bind(UserDao).toSelf()
+container.bind(UserService).toSelf()
+container.bind(UserController).toSelf()
+
+container.bind(ToDoDao).toSelf()
+container.bind(ToDoService).toSelf()
+container.bind(ToDoController).toSelf()
 
 container.bind(ApplicationSettingsDao).toSelf()
 container.bind(ApplicationSettingsService).toSelf()
@@ -38,6 +52,8 @@ container.bind(AppScreensController).toSelf()
 app.addController(container.get(ApplicationSettingsController))
 app.addController(container.get(AppThemesController))
 app.addController(container.get(AppScreensController))
+app.addController(container.get(UserController))
+app.addController(container.get(ToDoController))
 
 app.addMiddleWare(cors())
 app.addMiddleWare(json())

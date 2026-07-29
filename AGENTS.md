@@ -187,7 +187,7 @@ This backend is built using the smoke-trees ecosystem, specifically leveraging `
 
 Docs: [https://github.com/smoke-trees/node-template-ts/wiki](https://github.com/smoke-trees/node-template-ts/wiki)
 
---------------------------------------------------------------------------------
+---
 
 ## Verification
 
@@ -196,4 +196,3 @@ Docs: [https://github.com/smoke-trees/node-template-ts/wiki](https://github.com/
 ## Linting (post verification)
 
 - Run `npx prettier . --write` to format the code according to project standards
-

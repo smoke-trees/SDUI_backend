@@ -1,6 +1,9 @@
 import { ErrorCode, Result, Service } from '@smoke-trees/postgres-backend'
 import * as bcrypt from 'bcrypt'
 import { inject } from 'inversify'
+import jwt from 'jsonwebtoken'
+import RedisDatabaseObject from '../../redis/redis-connection'
+import settings from '../../settings'
 import { UserDao } from './User.dao'
 import { User } from './User.entity'
 
@@ -22,12 +25,22 @@ export class UserService extends Service<User> {
 
 		const hashedPassword = await this.hashPassword(password)
 
-		return await this.dao.create({
+		const userId = await this.dao.create({
 			email,
 			firstName,
 			lastName,
 			password: hashedPassword
 		})
+
+		if (!userId.result || userId.status.error) {
+			return new Result(true, ErrorCode.NotAuthorized, 'Error Creating User')
+		}
+
+		const userRead = await this.dao.read(userId.result!.toString())
+		if (!userRead.result) {
+			return new Result(true, ErrorCode.NotAuthorized, 'Error Reading User')
+		}
+		return this.generateToken(userRead.result)
 	}
 
 	async signIn(email: string, password: string) {
@@ -42,7 +55,42 @@ export class UserService extends Service<User> {
 			return new Result(true, ErrorCode.BadRequest, 'invalid password')
 		}
 
-		return new Result(false, ErrorCode.Success, user.message, user.result.id)
+		return this.generateToken(user.result)
+	}
+
+	private async generateToken(user: User) {
+		const tid = crypto.randomUUID()
+		const refreshTokenId = crypto.randomUUID()
+		const tokenExpiry = 2 * 3600
+		const refreshExpiry = 30 * 24 * 60 * 60
+
+		const token = jwt.sign({ sub: user.id, userId: user.id, ...user, tid }, settings.jwtSecretKey, {
+			algorithm: 'HS256',
+			expiresIn: tokenExpiry
+		})
+
+		const refreshToken = jwt.sign(
+			{ tid: refreshTokenId, userId: user.id },
+			settings.refreshSecretKey,
+			{ algorithm: 'HS256', expiresIn: refreshExpiry }
+		)
+
+		const { connection } = await RedisDatabaseObject
+
+		connection.set(
+			`refresh-token:${refreshTokenId}`,
+			JSON.stringify({ userId: user.id }),
+			'EX',
+			refreshExpiry
+		)
+
+		return new Result(false, ErrorCode.Success, 'Success!', {
+			accessToken: token,
+			refreshToken: refreshToken,
+			expiresIn: tokenExpiry,
+			refreshExpiry: refreshExpiry,
+			type: 'Bearer'
+		})
 	}
 
 	async hashPassword(password: string) {

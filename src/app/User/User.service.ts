@@ -1,4 +1,4 @@
-import { ErrorCode, Result, Service } from '@smoke-trees/postgres-backend'
+import { ErrorCode, log, Result, Service } from '@smoke-trees/postgres-backend'
 import * as bcrypt from 'bcrypt'
 import { inject } from 'inversify'
 import jwt from 'jsonwebtoken'
@@ -91,6 +91,29 @@ export class UserService extends Service<User> {
 			refreshExpiry: refreshExpiry,
 			type: 'Bearer'
 		})
+	}
+
+	async invalidateToken(refreshToken: string): Promise<Result<boolean>> {
+		try {
+			const { connection } = await RedisDatabaseObject
+
+			const decoded = jwt.verify(refreshToken, settings.refreshSecretKey, {
+				algorithms: ['HS256']
+			}) as { tid: string; user_id: string }
+
+			const token = await connection.get(`refresh-token:${decoded.tid}`)
+			if (!token) {
+				return new Result(true, ErrorCode.NotAuthorized, 'Invalid refresh token')
+			}
+			await connection.del(`refresh-token:${decoded.tid}`)
+
+			return new Result(false, ErrorCode.Success, 'Token invalidated', true)
+		} catch (error) {
+			log.error('Error in invalidating token', 'invalidateToken', error, {
+				refreshToken
+			})
+			return new Result(true, ErrorCode.InternalServerError, 'Error in invalidating token')
+		}
 	}
 
 	async hashPassword(password: string) {

@@ -40,6 +40,12 @@ export class UserController extends ServiceController<User> {
 				method: Methods.POST,
 				path: '/sign-in',
 				localMiddleware: []
+			},
+			{
+				handler: this.invalidateToken.bind(this),
+				method: Methods.POST,
+				path: '/invalidate-token',
+				localMiddleware: []
 			}
 		)
 		this.loadDocumentation()
@@ -143,6 +149,45 @@ export class UserController extends ServiceController<User> {
 		}
 
 		const result = await this.service.signIn(email, password)
+		res.status(result.getStatus()).json(result)
+	}
+
+	@Documentation.addRoute({
+		method: Methods.POST,
+		path: '/invalidate-token',
+		description: 'Invalidate Token',
+		requestBody: {
+			type: 'object',
+			properties: {
+				refreshToken: {
+					type: 'string'
+				}
+			}
+		},
+		responses: {
+			400: {
+				description: 'Invalid Request',
+				value: {
+					$ref: Documentation.getRef(User)
+				}
+			},
+			200: {
+				description: 'User Created',
+				value: {
+					$ref: Documentation.getRef(User)
+				}
+			}
+		}
+	})
+	async invalidateToken(req: Request, res: Response) {
+		const { refreshToken } = req.body
+
+		if (!refreshToken) {
+			res.status(400).json(new Result(true, ErrorCode.BadRequest, 'refreshToken is required'))
+			return
+		}
+
+		const result = await this.service.invalidateToken(refreshToken)
 		res.status(result.getStatus()).json(result)
 	}
 }

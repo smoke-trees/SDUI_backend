@@ -26,7 +26,11 @@ export class AppThemesService extends Service<AppThemes> {
 
 		let newVersion = 1
 
-		if (!lastDeployed.status.error && lastDeployed.result) {
+		if (
+			!lastDeployed.status.error &&
+			lastDeployed.result &&
+			(lastDeployed.result.length ?? 0) > 0
+		) {
 			newVersion = lastDeployed.result[0].version + 1
 			const existingLatest = await this.dao.read({ where: { themeName, isLatest: true } })
 

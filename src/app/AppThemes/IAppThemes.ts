@@ -4,5 +4,7 @@ export interface IAppThemes {
 	themeJson: string
 	version: number
 	isLatest: boolean
+	scheduleStartDate: string
+	scheduleEndDate: string
 	lastDeployed: string
 }

@@ -26,6 +26,14 @@ export class AppThemes extends BaseEntity implements IAppThemes {
 	isLatest!: boolean
 
 	@Documentation.addField({ type: 'string' })
+	@Column({ name: 'schedule_start_date', type: 'timestamp without time zone', nullable: true })
+	scheduleStartDate!: string
+
+	@Documentation.addField({ type: 'string' })
+	@Column({ name: 'schedule_end_date', type: 'timestamp without time zone', nullable: true })
+	scheduleEndDate!: string
+
+	@Documentation.addField({ type: 'string' })
 	@Column({ name: 'last_deployed', type: 'timestamp without time zone', nullable: true })
 	lastDeployed!: string
 
@@ -37,6 +45,8 @@ export class AppThemes extends BaseEntity implements IAppThemes {
 			this.themeJson = data.themeJson
 			this.version = data.version
 			this.isLatest = data.isLatest
+			this.scheduleStartDate = data.scheduleStartDate
+			this.scheduleEndDate = data.scheduleEndDate
 			this.lastDeployed = data.lastDeployed
 		}
 	}

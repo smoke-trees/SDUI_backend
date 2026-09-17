@@ -4,5 +4,7 @@ export interface IAppScreens {
 	screenJson: string
 	version: number
 	isLatest: boolean
+	scheduleStartDate?: string
+	scheduleEndDate?: string
 	lastDeployed: string
 }

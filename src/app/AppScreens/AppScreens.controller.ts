@@ -89,7 +89,7 @@ export class AppScreensController extends ServiceController<AppScreens> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/screens/deploy',
+		path: '/app-screens/deploy',
 		description: 'Deploy a new screen',
 		requestBody: {
 			type: 'object',
@@ -125,7 +125,7 @@ export class AppScreensController extends ServiceController<AppScreens> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/screens/schedule-deploy',
+		path: '/app-screens/schedule-deploy',
 		description: 'Schedule a new screen',
 		requestBody: {
 			type: 'object',
@@ -176,7 +176,7 @@ export class AppScreensController extends ServiceController<AppScreens> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/screens/revert',
+		path: '/app-screens/revert',
 		description: 'Revert to latest version',
 		requestBody: {
 			type: 'object',
@@ -212,7 +212,7 @@ export class AppScreensController extends ServiceController<AppScreens> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/screens/schedule-cron',
+		path: '/app-screens/schedule-cron',
 		description: 'Run the schedule cron for screens (activate due schedules, expire ended ones)',
 		requestBody: {
 			type: 'object',
@@ -252,5 +252,71 @@ export class AppScreensController extends ServiceController<AppScreens> {
 					{ activated: activated.result, expired: expired.result }
 				)
 			)
+	}
+
+	@Documentation.addRoute({
+		method: Methods.POST,
+		path: '/app-screens/schedule-cron/activate',
+		description: 'Testing route: send a date, schedules active on it become isLatest',
+		requestBody: {
+			type: 'object',
+			properties: {
+				date: {
+					type: 'string'
+				}
+			}
+		},
+		responses: {
+			400: {
+				description: 'Invalid Request',
+				value: {
+					$ref: Documentation.getRef(Result)
+				}
+			},
+			200: {
+				description: 'Scheduled Screens Activated',
+				value: {
+					$ref: Documentation.getRef(Result)
+				}
+			}
+		}
+	})
+	async activateCron(req: Request, res: Response) {
+		const { date } = req.body ?? {}
+		const result = await this.service.activateScheduled(date)
+		res.status(200).json(result)
+	}
+
+	@Documentation.addRoute({
+		method: Methods.POST,
+		path: '/app-screens/schedule-cron/expire',
+		description: 'Testing route: send a date, schedules ended before it lose isLatest',
+		requestBody: {
+			type: 'object',
+			properties: {
+				date: {
+					type: 'string'
+				}
+			}
+		},
+		responses: {
+			400: {
+				description: 'Invalid Request',
+				value: {
+					$ref: Documentation.getRef(Result)
+				}
+			},
+			200: {
+				description: 'Expired Schedules Cleared',
+				value: {
+					$ref: Documentation.getRef(Result)
+				}
+			}
+		}
+	})
+	async expireCron(req: Request, res: Response) {
+		const { date } = req.body ?? {}
+		const result = await this.service.expireScheduled(date)
+		res.status(200).json(result)
 	}
 }

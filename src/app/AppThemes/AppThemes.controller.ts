@@ -89,7 +89,7 @@ export class AppThemesController extends ServiceController<AppThemes> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/themes/deploy',
+		path: '/app-themes/deploy',
 		description: 'Deploy a new theme',
 		requestBody: {
 			type: 'object',
@@ -125,7 +125,7 @@ export class AppThemesController extends ServiceController<AppThemes> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/themes/schedule-deploy',
+		path: '/app-themes/schedule-deploy',
 		description: 'Schedule a new theme',
 		requestBody: {
 			type: 'object',
@@ -176,7 +176,7 @@ export class AppThemesController extends ServiceController<AppThemes> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/themes/revert',
+		path: '/app-themes/revert',
 		description: 'Revert to latest version',
 		requestBody: {
 			type: 'object',
@@ -212,7 +212,7 @@ export class AppThemesController extends ServiceController<AppThemes> {
 
 	@Documentation.addRoute({
 		method: Methods.POST,
-		path: '/themes/schedule-cron',
+		path: '/app-themes/schedule-cron',
 		description: 'Run the schedule cron for themes (activate due schedules, expire ended ones)',
 		requestBody: {
 			type: 'object',
